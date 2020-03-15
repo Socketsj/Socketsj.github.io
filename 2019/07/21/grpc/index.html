@@ -97,19 +97,20 @@
 
 
   <meta name="description" content="grpc是rpc框架的一种，定义了远程方法调用的方式。最近总结学习了一些关于grpc的知识，从rpc开始切入，写下这篇文章。 RPC rpc是远程过程调用(Remote Procedure Call，缩写为 RPC)。是一种计算机通信协议，该协议允许运行于一台计算机的程序调用另一台计算机的子程序，而程序员无需额外地为这个交互作用编程。 如果涉及的软件采用面向对象编程，那么远程过程调用亦可称作">
+<meta name="keywords" content="golang">
 <meta property="og:type" content="article">
 <meta property="og:title" content="grpc">
 <meta property="og:url" content="http://yoursite.com/2019/07/21/grpc/index.html">
 <meta property="og:site_name" content="黄少杰">
 <meta property="og:description" content="grpc是rpc框架的一种，定义了远程方法调用的方式。最近总结学习了一些关于grpc的知识，从rpc开始切入，写下这篇文章。 RPC rpc是远程过程调用(Remote Procedure Call，缩写为 RPC)。是一种计算机通信协议，该协议允许运行于一台计算机的程序调用另一台计算机的子程序，而程序员无需额外地为这个交互作用编程。 如果涉及的软件采用面向对象编程，那么远程过程调用亦可称作">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:image" content="http://yoursite.com/2019/07/21/grpc/grpc/rpc.jpg">
-<meta property="og:image" content="http://yoursite.com/2019/07/21/grpc/grpc/grpc.jpg">
-<meta property="og:updated_time" content="2019-09-10T13:37:24.801Z">
+<meta property="og:image" content="http://yoursite.com/2019/07/21/grpc/rpc.jpg">
+<meta property="og:image" content="http://yoursite.com/2019/07/21/grpc/grpc.jpg">
+<meta property="og:updated_time" content="2020-03-15T03:05:34.454Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="grpc">
 <meta name="twitter:description" content="grpc是rpc框架的一种，定义了远程方法调用的方式。最近总结学习了一些关于grpc的知识，从rpc开始切入，写下这篇文章。 RPC rpc是远程过程调用(Remote Procedure Call，缩写为 RPC)。是一种计算机通信协议，该协议允许运行于一台计算机的程序调用另一台计算机的子程序，而程序员无需额外地为这个交互作用编程。 如果涉及的软件采用面向对象编程，那么远程过程调用亦可称作">
-<meta name="twitter:image" content="http://yoursite.com/2019/07/21/grpc/grpc/rpc.jpg">
+<meta name="twitter:image" content="http://yoursite.com/2019/07/21/grpc/rpc.jpg">
 
 
 
@@ -414,15 +415,15 @@
                 
                   <span class="post-meta-item-text">更新于</span>
                 
-                <time title="修改时间：2019-09-10 21:37:24" itemprop="dateModified" datetime="2019-09-10T21:37:24+08:00">2019-09-10</time>
+                <time title="修改时间：2020-03-15 11:05:34" itemprop="dateModified" datetime="2020-03-15T11:05:34+08:00">2020-03-15</time>
               
             
           </span>
           
             <span class="post-updated">
               &nbsp; | &nbsp; 更新于
-              <time itemprop="dateUpdated" datetime="2019-09-10T21:37:24+08:00" content="2019-09-10">
-                2019-09-10
+              <time itemprop="dateUpdated" datetime="2020-03-15T11:05:34+08:00" content="2020-03-15">
+                2020-03-15
               </time>
             </span>
           
@@ -459,7 +460,7 @@
 
 <p> grpc是rpc框架的一种，定义了远程方法调用的方式。最近总结学习了一些关于grpc的知识，从rpc开始切入，写下这篇文章。</p>
 <h1 id="RPC"><a href="#RPC" class="headerlink" title="RPC"></a>RPC</h1><p> rpc是远程过程调用(Remote Procedure Call，缩写为 RPC)。是一种计算机通信协议，该协议允许运行于一台计算机的程序调用另一台计算机的子程序，而程序员无需额外地为这个交互作用编程。 如果涉及的软件采用面向对象编程，那么远程过程调用亦可称作远程调用或远程方法调用</p>
-<p> <img src="grpc/rpc.jpg" alt></p>
+<p> <img src="/2019/07/21/grpc/rpc.jpg" alt></p>
 <p> 上图为rpc调用过程, RPC 本身是 client-server模型,也是一种 request-response 协议。不同的rpc框架本质都是客户端发起请求，服务器作出响应。</p>
 <p> 服务的调用过程为：</p>
 <ol>
@@ -474,7 +475,7 @@
 </ol>
 <h1 id="gRPC"><a href="#gRPC" class="headerlink" title="gRPC"></a>gRPC</h1><p> gRPC就是一种偏向于跨语言调用的rpc框架，由Google开源。</p>
 <h2 id="概念"><a href="#概念" class="headerlink" title="概念"></a>概念</h2><p> 一个客户端程序可以直接调用一个服务端程序中的方法，这个服务端程序可以是在另外一台机器上，调用起来就像它是一个本地对象，这就方便你创造分布式的应用和服务。</p>
-<p> <img src="grpc/grpc.jpg" alt></p>
+<p> <img src="/2019/07/21/grpc/grpc.jpg" alt></p>
 <p> 正如需要RPC系统那样，gRPC的思想基础也是：定义一个服务，然后指定方法可以通过参数和返回类型，来远程调用它们。在服务端，程序实现这个接口，并且运行一个gRPC服务器来处理客户端调用。在客户端，有一个存根（stub，即为用任何语言写的客户端程序），它提供了和服务端相同的方法。</p>
 <h2 id="数据格式"><a href="#数据格式" class="headerlink" title="数据格式"></a>数据格式</h2><p> 通信过程需要定义一种数据格式，比如json、xml等都是一种数据格式。grpc使用proto buffer，用来序列化结构化的数据。proto buffer也是Google的一个成熟开源框架。</p>
 <p> 使用proto buffer，先定义.proto后缀的proto文件。proto buffer的数据被结构化为消息，每一个message都是一个小的逻辑记录，包含了一系列的被称为fields的name-value对信息。例如proto文件定义如下。</p>
@@ -522,6 +523,12 @@
 
     <footer class="post-footer">
       
+        <div class="post-tags">
+          
+            <a href="/tags/golang/" rel="tag"># golang</a>
+          
+        </div>
+      
 
       
       
@@ -541,8 +548,8 @@
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2019/09/10/first/" rel="prev" title="My first post">
-                My first post <i class="fa fa-chevron-right"></i>
+              <a href="/2019/08/03/gogc/" rel="prev" title="golang GC">
+                golang GC <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -614,7 +621,7 @@
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">10</span>
+                    <span class="site-state-item-count">13</span>
                     <span class="site-state-item-name">日志</span>
                   </a>
                 </div>
@@ -645,7 +652,9 @@
                     
                       
                     
-                    <span class="site-state-item-count">7</span>
+                      
+                    
+                    <span class="site-state-item-count">8</span>
                     <span class="site-state-item-name">分类</span>
                   </a>
                 </div>
@@ -684,7 +693,11 @@
                     
                       
                     
-                    <span class="site-state-item-count">11</span>
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">13</span>
                     <span class="site-state-item-name">标签</span>
                   </a>
                 </div>
@@ -769,7 +782,7 @@
 
     <footer id="footer" class="footer">
       <div class="footer-inner">
-        <div class="copyright">&copy; 2015 – <span itemprop="copyrightYear">2019</span>
+        <div class="copyright">&copy; 2015 – <span itemprop="copyrightYear">2020</span>
   <span class="with-love" id="animate">
     <i class="fa fa-user"></i>
   </span>

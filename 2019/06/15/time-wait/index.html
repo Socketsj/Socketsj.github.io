@@ -104,13 +104,13 @@
 <meta property="og:site_name" content="黄少杰">
 <meta property="og:description" content="有一天突发奇想，上去服务器去看看服务器的连接状态。发现大部分连接都是establish，有一小部分是time_wait。   正常情况tcp连接成功后自然是establish状态，但是time_wait是怎么来的呢？查询过资料time_wait过多会影响服务器性能？ time_wait怎么来的tcp四次挥手   上面是一个TCP连接四次挥手的过程。从图中得知主动关闭tcp连接的一方会进入tim">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:image" content="http://yoursite.com/2019/06/15/time-wait/time-wait/fin.jpg">
-<meta property="og:image" content="http://yoursite.com/2019/06/15/time-wait/time-wait/struct.jpg">
+<meta property="og:image" content="http://yoursite.com/2019/06/15/time-wait/fin.jpg">
+<meta property="og:image" content="http://yoursite.com/2019/06/15/time-wait/struct.jpg">
 <meta property="og:updated_time" content="2019-09-10T13:37:24.823Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="time wait的问题">
 <meta name="twitter:description" content="有一天突发奇想，上去服务器去看看服务器的连接状态。发现大部分连接都是establish，有一小部分是time_wait。   正常情况tcp连接成功后自然是establish状态，但是time_wait是怎么来的呢？查询过资料time_wait过多会影响服务器性能？ time_wait怎么来的tcp四次挥手   上面是一个TCP连接四次挥手的过程。从图中得知主动关闭tcp连接的一方会进入tim">
-<meta name="twitter:image" content="http://yoursite.com/2019/06/15/time-wait/time-wait/fin.jpg">
+<meta name="twitter:image" content="http://yoursite.com/2019/06/15/time-wait/fin.jpg">
 
 
 
@@ -476,7 +476,7 @@
       
         <p><meta name="referrer" content="no-referrer"><br>  有一天突发奇想，上去服务器去看看服务器的连接状态。发现大部分连接都是establish，有一小部分是time_wait。</p>
 <p>  正常情况tcp连接成功后自然是establish状态，但是time_wait是怎么来的呢？查询过资料time_wait过多会影响服务器性能？</p>
-<h1 id="time-wait怎么来的"><a href="#time-wait怎么来的" class="headerlink" title="time_wait怎么来的"></a>time_wait怎么来的</h1><h2 id="tcp四次挥手"><a href="#tcp四次挥手" class="headerlink" title="tcp四次挥手"></a>tcp四次挥手</h2><p> <img src="time-wait/fin.jpg" alt></p>
+<h1 id="time-wait怎么来的"><a href="#time-wait怎么来的" class="headerlink" title="time_wait怎么来的"></a>time_wait怎么来的</h1><h2 id="tcp四次挥手"><a href="#tcp四次挥手" class="headerlink" title="tcp四次挥手"></a>tcp四次挥手</h2><p> <img src="/2019/06/15/time-wait/fin.jpg" alt></p>
 <p> 上面是一个TCP连接四次挥手的过程。从图中得知主动关闭tcp连接的一方会进入time_wait状态，等待2MSL时间后才进入close。</p>
 <p> 一般情况关闭tcp连接的服务器一段，如果此时有一部分连接开始关闭了(time_wait存在时间够长)，可以解析这时有一部分连接是处于time_wait。</p>
 <h2 id="为什么需要time-wait"><a href="#为什么需要time-wait" class="headerlink" title="为什么需要time_wait"></a>为什么需要time_wait</h2><p> 为什么需要time_wait这一个过渡状态，不可以直接进入close吗？</p>
@@ -498,7 +498,7 @@
 <p> 出现TIME_WAIT状态的连接，一定出现在主动关闭连接的一方。所以，当主动关闭连接的一方，再次向对方发起连接请求的时候（例如，客户端关闭连接，客户端再次连接服务端，此时可以复用了；负载均衡服务器，主动关闭后端的连接，当有新的HTTP请求，负载均衡服务器再次连接后端服务器，此时也可以复用），可以复用TIME_WAIT状态的连接。</p>
  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">net.ipv4.tcp_tw_recycle</span><br></pre></td></tr></table></figure>
 <p> 当开启了这个配置后，内核会快速的回收处于TIME_WAIT状态的socket连接。一个RTO（retransmission timeout，数据包重传的timeout时间）的时间后回收，这个时间根据RTT动态计算出来，但是远小于2MSL。当服务器再次使用这个端口(这里不是重启)，内核里会记录包括该socket连接对应的五元组中的对方IP等在内的一些统计数据，当然也包括从该对方IP所接收到的最近的一次数据包时间。当有新的数据包到达，只要时间晚于内核记录的这个时间，数据包都会被统统的丢掉。</p>
-<p> <img src="time-wait/struct.jpg" alt></p>
+<p> <img src="/2019/06/15/time-wait/struct.jpg" alt></p>
 <p> 一般服务架构如上图,客户端通过HTTP/1.1连接负载均衡，也就是说，HTTP协议投Connection为keep-alive，所以我们假定，客户端 对 负载均衡服务器 的socket连接，客户端会断开连接，所以，TIME_WAIT出现在客户端Web服务器和MySQL服务器的连接，我们假定，Web服务器上的程序在连接结束的时候，调用close操作关闭socket资源连接，所以，TIME_WAIT出现在 Web 服务器端。</p>
 <p>  所以Web服务器上，肯定可以配置开启的配置：tcp_tw_reuse；如果Web服务器有很多连向DB服务器的连接，可以保证socket连接的复用。那么，负载均衡服务器和Web服务器，谁先关闭连接，则决定了我们怎么配置tcp_tw_reuse/tcp_tw_recycle了</p>
 <h2 id="负载均衡-首先关闭连接"><a href="#负载均衡-首先关闭连接" class="headerlink" title="负载均衡 首先关闭连接"></a>负载均衡 首先关闭连接</h2><p> 在这种情况下，因为负载均衡服务器对Web服务器的连接，TIME_WAIT大都出现在负载均衡服务器上，<br> <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"># 在负载均衡服务器上的配置</span><br><span class="line">net.ipv4.tcp_tw_reuse = 1 //尽量复用连接</span><br><span class="line">net.ipv4.tcp_tw_recycle = 0</span><br><span class="line"></span><br><span class="line"># 在Web服务器上的配置</span><br><span class="line">net.ipv4.tcp_tw_reuse = 1 //这个配置主要影响的是Web服务器到DB服务器的连接复用</span><br><span class="line">net.ipv4.tcp_tw_recycle： 设置成1和0都没有任何意义</span><br></pre></td></tr></table></figure></p>
@@ -626,7 +626,7 @@
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">10</span>
+                    <span class="site-state-item-count">13</span>
                     <span class="site-state-item-name">日志</span>
                   </a>
                 </div>
@@ -657,7 +657,9 @@
                     
                       
                     
-                    <span class="site-state-item-count">7</span>
+                      
+                    
+                    <span class="site-state-item-count">8</span>
                     <span class="site-state-item-name">分类</span>
                   </a>
                 </div>
@@ -696,7 +698,11 @@
                     
                       
                     
-                    <span class="site-state-item-count">11</span>
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">13</span>
                     <span class="site-state-item-name">标签</span>
                   </a>
                 </div>
@@ -781,7 +787,7 @@
 
     <footer id="footer" class="footer">
       <div class="footer-inner">
-        <div class="copyright">&copy; 2015 – <span itemprop="copyrightYear">2019</span>
+        <div class="copyright">&copy; 2015 – <span itemprop="copyrightYear">2020</span>
   <span class="with-love" id="animate">
     <i class="fa fa-user"></i>
   </span>

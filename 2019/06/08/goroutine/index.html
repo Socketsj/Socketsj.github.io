@@ -104,17 +104,17 @@
 <meta property="og:site_name" content="黄少杰">
 <meta property="og:description" content="提起golang，莫过于goroutine，是其与其他语言最大的区别，原生支持并发。学习使用golang都有一段时间了，这里总结一下对goroutine的理解。 并发模型 golang的并发单位是goroutine，是一种协程。协程是一种构建于线程之上的并发单位，比线程轻量，占用资源更小。  一般并发模型有如下三种，内核级线程模型、用户级线程模型和两级线程模型（也称混合型线程模型），gorout">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:image" content="http://yoursite.com/2019/06/08/goroutine/goroutine/kkse.jpg">
-<meta property="og:image" content="http://yoursite.com/2019/06/08/goroutine/goroutine/mkse.jpg">
-<meta property="og:image" content="http://yoursite.com/2019/06/08/goroutine/goroutine/mkse.jpg">
-<meta property="og:image" content="http://yoursite.com/2019/06/08/goroutine/goroutine/gmp.jpg">
-<meta property="og:image" content="http://yoursite.com/2019/06/08/goroutine/goroutine/gmpse.jpg">
-<meta property="og:image" content="http://yoursite.com/2019/06/08/goroutine/goroutine/status.jpg">
+<meta property="og:image" content="http://yoursite.com/2019/06/08/goroutine/kkse.jpg">
+<meta property="og:image" content="http://yoursite.com/2019/06/08/goroutine/mkse.jpg">
+<meta property="og:image" content="http://yoursite.com/2019/06/08/goroutine/mkse.jpg">
+<meta property="og:image" content="http://yoursite.com/2019/06/08/goroutine/gmp.jpg">
+<meta property="og:image" content="http://yoursite.com/2019/06/08/goroutine/gmpse.jpg">
+<meta property="og:image" content="http://yoursite.com/2019/06/08/goroutine/status.jpg">
 <meta property="og:updated_time" content="2019-09-10T13:37:24.798Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="golang协程">
 <meta name="twitter:description" content="提起golang，莫过于goroutine，是其与其他语言最大的区别，原生支持并发。学习使用golang都有一段时间了，这里总结一下对goroutine的理解。 并发模型 golang的并发单位是goroutine，是一种协程。协程是一种构建于线程之上的并发单位，比线程轻量，占用资源更小。  一般并发模型有如下三种，内核级线程模型、用户级线程模型和两级线程模型（也称混合型线程模型），gorout">
-<meta name="twitter:image" content="http://yoursite.com/2019/06/08/goroutine/goroutine/kkse.jpg">
+<meta name="twitter:image" content="http://yoursite.com/2019/06/08/goroutine/kkse.jpg">
 
 
 
@@ -482,11 +482,11 @@
 <h1 id="并发模型"><a href="#并发模型" class="headerlink" title="并发模型"></a>并发模型</h1><p> golang的并发单位是goroutine，是一种协程。协程是一种构建于线程之上的并发单位，比线程轻量，占用资源更小。</p>
 <p> 一般并发模型有如下三种，内核级线程模型、用户级线程模型和两级线程模型（也称混合型线程模型），goroutine就是第三种混合型线程模型。</p>
 <h2 id="内核级线程"><a href="#内核级线程" class="headerlink" title="内核级线程"></a>内核级线程</h2><p> cpu基本调度单位是线程，内核级线程就是cpu最小调度单位，一般称为的线程就是内核级别线程。内核级别线程。应用程序对线程的创建、终止以及同步都基于内核提供的系统调用来完成。比如java中的Thread实际是内核级别线程。实现简单，借助操作系统提供函数实现调度，能充分利用到多核cpu优势并行处理，但是线程创建销毁调用等都是内核操作比较消耗系统资源。</p>
-<p> <img src="goroutine/kkse.jpg" alt></p>
+<p> <img src="/2019/06/08/goroutine/kkse.jpg" alt></p>
 <h2 id="用户级线程"><a href="#用户级线程" class="headerlink" title="用户级线程"></a>用户级线程</h2><p> 如果说内核级线程模型:用户线程数:内核线程数 = 1 : 1。那么用户级线程模型的比例:N: 1，即一个内核线程里运行多个用户级线程。用户级线程运行在线程之上，不由内核系统参与创建、销毁以及同步，一般称为协程。比如python的gevent就是协程。由于线程调度是在用户层面完成不需要进行系统调用，这种实现方式轻量级，消耗资源少。因为所有协程都在一个内核线程上跑，不能做到真正并行处理，不能利用cpu多核优势。</p>
-<p> <img src="goroutine/mkse.jpg" alt></p>
+<p> <img src="/2019/06/08/goroutine/mkse.jpg" alt></p>
 <h2 id="两级线程"><a href="#两级线程" class="headerlink" title="两级线程"></a>两级线程</h2><p> 两级线程模型是博采众长之后的产物，充分吸收前两种线程模型的优点且尽量规避它们的缺点。在此模型下，用户线程与内核KSE是多对多（N : M），且一个用户级线程可以在不同的内核线程运行。比如，某个内核线程因io阻塞调用被cpu挂起，内核线程中的用户级线程可以去到其他内核线程中运行。用户级线程由在用户层面完成调度，内核线程由系统内核处理，所以两级线程模型是自身调度与系统调度协同工作。Go语言中的runtime调度器实现这个二级线程模型，实现了goroutine和内核线程动态关联。</p>
-<p> <img src="goroutine/mkse.jpg" alt></p>
+<p> <img src="/2019/06/08/goroutine/mkse.jpg" alt></p>
 <h1 id="GPM"><a href="#GPM" class="headerlink" title="GPM"></a>GPM</h1><p> go的并发模型由Go Scheduler 来调度，其中包含三个概念G、P和M。</p>
 <h2 id="G"><a href="#G" class="headerlink" title="G"></a>G</h2><p> G代表goroutine的抽象，每一次使用go关键字都会创建G对象它包括栈、指令指针以及对于调用goroutines很重要的其它信息，比如阻塞它的任何channel。G要到了P中才会真正得到执行，以下为G的结构。</p>
  <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> g <span class="keyword">struct</span> &#123;</span><br><span class="line">  stack       stack   <span class="comment">// 描述了真实的栈内存，包括上下界</span></span><br><span class="line">  m              *m     <span class="comment">// 当前的m</span></span><br><span class="line">  sched          gobuf   <span class="comment">// goroutine切换时，用于保存g的上下文      </span></span><br><span class="line">  param          unsafe.Pointer <span class="comment">// 用于传递参数，睡眠时其他goroutine可以设置param，唤醒时该goroutine可以获取</span></span><br><span class="line">  atomicstatus   <span class="keyword">uint32</span></span><br><span class="line">  stackLock      <span class="keyword">uint32</span> </span><br><span class="line">  goid           <span class="keyword">int64</span>  <span class="comment">// goroutine的ID</span></span><br><span class="line">  waitsince      <span class="keyword">int64</span> <span class="comment">// g被阻塞的大体时间</span></span><br><span class="line">  lockedm        *m     <span class="comment">// G被锁定只在这个m上运行</span></span><br></pre></td></tr></table></figure>
@@ -514,12 +514,12 @@
 <li>被动释放: 如果发生系统调用，有一个专门监控程序，进行扫描当前处于阻塞的P/M组合。当超过系统程序设置的超时时间，会自动将P资源抢走。去执行队列的其它G任务。</li>
 </ul>
 <h3 id="GPM关系图"><a href="#GPM关系图" class="headerlink" title="GPM关系图"></a>GPM关系图</h3><p> 下图正在执行的Goroutine为蓝色的；处于待执行状态的goroutine为灰色的，灰色的goroutine形成了一个队列。</p>
-<p> <img src="goroutine/gmp.jpg" alt></p>
+<p> <img src="/2019/06/08/goroutine/gmp.jpg" alt></p>
 <p> 通过go关键字创建一个新的goroutine的时候，它会优先被放入P的本地队列。为了运行goroutine，M需要持有（绑定）一个P，接着M会启动一个OS线程，循环从P的本地队列里取出一个goroutine并执行。当然还有上文提及的 work-stealing调度算法：当M执行完了当前P的Local队列里的所有G后，它会先尝试从Global队列寻找G来执行，如果Global队列为空，它会随机挑选另外一个P，从它的队列里中拿走一半的G到自己的队列中执行。</p>
 <p> gpm三者宏观关系图</p>
-<p>  <img src="goroutine/gmpse.jpg" alt></p>
+<p>  <img src="/2019/06/08/goroutine/gmpse.jpg" alt></p>
 <h1 id="goroutine生命周期"><a href="#goroutine生命周期" class="headerlink" title="goroutine生命周期"></a>goroutine生命周期</h1><p> goroutine的生命周期和内核线程类似， 同样包含了各种状态的变换</p>
-<p> <img src="goroutine/status.jpg" alt></p>
+<p> <img src="/2019/06/08/goroutine/status.jpg" alt></p>
 <h2 id="Grunable"><a href="#Grunable" class="headerlink" title="Grunable"></a>Grunable</h2><p> goroutine会有三种种情况进入Grunable状态</p>
 <h3 id="创建"><a href="#创建" class="headerlink" title="创建"></a>创建</h3><p> 用户入口函数main·main的执行goroutine在内的所有任务，都是通过runtime·newproc -&gt; runtime·newproc1 这两个函数创建的，前者其实就是对后者的一层封装，提供可变参数支持，Go语言的go关键字最终会被编译器映射为对runtime·newproc的调用。当runtime·newproc1完成了资源的分配及初始化后，新任务的状态会被置为Grunnable，然后被添加到当前 P 的私有任务队列中，等待调度执行。</p>
 <h3 id="阻塞任务唤醒"><a href="#阻塞任务唤醒" class="headerlink" title="阻塞任务唤醒"></a>阻塞任务唤醒</h3><p> 当某个阻塞任务（状态为Gwaiting）的等待条件满足而被唤醒时—如一个任务G#1向某个channel写入数据将唤醒之前等待读取该channel数据的任务G#2——G#1通过调用runtime·ready将G#2状态重新置为Grunnable并添加到任务队列中。</p>
@@ -658,7 +658,7 @@
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">10</span>
+                    <span class="site-state-item-count">13</span>
                     <span class="site-state-item-name">日志</span>
                   </a>
                 </div>
@@ -689,7 +689,9 @@
                     
                       
                     
-                    <span class="site-state-item-count">7</span>
+                      
+                    
+                    <span class="site-state-item-count">8</span>
                     <span class="site-state-item-name">分类</span>
                   </a>
                 </div>
@@ -728,7 +730,11 @@
                     
                       
                     
-                    <span class="site-state-item-count">11</span>
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">13</span>
                     <span class="site-state-item-name">标签</span>
                   </a>
                 </div>
@@ -813,7 +819,7 @@
 
     <footer id="footer" class="footer">
       <div class="footer-inner">
-        <div class="copyright">&copy; 2015 – <span itemprop="copyrightYear">2019</span>
+        <div class="copyright">&copy; 2015 – <span itemprop="copyrightYear">2020</span>
   <span class="with-love" id="animate">
     <i class="fa fa-user"></i>
   </span>

@@ -104,13 +104,13 @@
 <meta property="og:site_name" content="黄少杰">
 <meta property="og:description" content="Redis5.0发布了一个新特性功能。多了一种数据结构名为Stream,它是一个新的强大的支持多播的可持久化消息队列，作者坦言Stream设计极大借鉴了Kafka。比起以前的sub/pub可靠谱多了。 Redis Stream  Redis Stream的结构如图所示，它有一个消息链表，将所有加入的消息都串起来，每个消息都有对应id和内容，id是自增的，消息是持久化的，Redis重启，内容还">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:image" content="http://yoursite.com/2019/05/18/redis-stream/redis-stream/redis_stream.jpg">
-<meta property="og:image" content="http://yoursite.com/2019/05/18/redis-stream/redis-stream/redis_consumer.jpg">
+<meta property="og:image" content="http://yoursite.com/2019/05/18/redis-stream/redis_stream.jpg">
+<meta property="og:image" content="http://yoursite.com/2019/05/18/redis-stream/redis_consumer.jpg">
 <meta property="og:updated_time" content="2019-09-10T13:37:24.821Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Redis Stream">
 <meta name="twitter:description" content="Redis5.0发布了一个新特性功能。多了一种数据结构名为Stream,它是一个新的强大的支持多播的可持久化消息队列，作者坦言Stream设计极大借鉴了Kafka。比起以前的sub/pub可靠谱多了。 Redis Stream  Redis Stream的结构如图所示，它有一个消息链表，将所有加入的消息都串起来，每个消息都有对应id和内容，id是自增的，消息是持久化的，Redis重启，内容还">
-<meta name="twitter:image" content="http://yoursite.com/2019/05/18/redis-stream/redis-stream/redis_stream.jpg">
+<meta name="twitter:image" content="http://yoursite.com/2019/05/18/redis-stream/redis_stream.jpg">
 
 
 
@@ -477,7 +477,7 @@
         <meta name="referrer" content="no-referrer">
 
 <p> Redis5.0发布了一个新特性功能。多了一种数据结构名为Stream,它是一个新的强大的支持多播的可持久化消息队列，作者坦言Stream设计极大借鉴了Kafka。比起以前的sub/pub可靠谱多了。</p>
-<h1 id="Redis-Stream"><a href="#Redis-Stream" class="headerlink" title="Redis Stream"></a>Redis Stream</h1><p><img src="redis-stream/redis_stream.jpg" alt></p>
+<h1 id="Redis-Stream"><a href="#Redis-Stream" class="headerlink" title="Redis Stream"></a>Redis Stream</h1><p><img src="/2019/05/18/redis-stream/redis_stream.jpg" alt></p>
 <p> Redis Stream的结构如图所示，它有一个消息链表，将所有加入的消息都串起来，每个消息都有对应id和内容，id是自增的，消息是持久化的，Redis重启，内容还能保存。</p>
 <p> 每个Stream都有唯一的key，可以挂在多个消费组，每个消费组可以挂多个消费者。</p>
 <p> 消费组存有一个游标值last_delivered_id记录消费到那个消息。每个消费组之间互不干涉，消费组内消费者存在竞争关系，消费组内消费者消费时会跟新游标值（这一点和Kafka很相似）。</p>
@@ -497,7 +497,7 @@
 </ul>
 <h2 id="消息长度"><a href="#消息长度" class="headerlink" title="消息长度"></a>消息长度</h2><p> 消息若是被一直添加，会积累太多，Stream的消息链表会越积越长。同时上面提供的xdel指令不会真正删除消息，只是标记删除。</p>
 <p> Redis提供两种方法现在长度xtirm和xadd的指令中提供maxlen参数，这样可以控制消息长度不会超过最大指定长度</p>
-<h1 id="消费"><a href="#消费" class="headerlink" title="消费"></a>消费</h1><p><img src="redis-stream/redis_consumer.jpg" alt></p>
+<h1 id="消费"><a href="#消费" class="headerlink" title="消费"></a>消费</h1><p><img src="/2019/05/18/redis-stream/redis_consumer.jpg" alt></p>
 <p> 上图是Redis Stream的消费模型，Prouder通过xadd命令往Stream中添加消息。使用xgroup create在Stream上创建对应Consumer Group。消费者使用xreadgroup命令挂在消费组上进行消费，然后xack命令标记消息消费过。</p>
 <h2 id="独立消费"><a href="#独立消费" class="headerlink" title="独立消费"></a>独立消费</h2><p> 上面说过，一个消费者是可以不挂在消费组中，直接挂在Stream上进行独立消费的。Redis使用xread指令，来进行独立消费，这样看起来好像在使用list结构一样<br> <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"># 从Stream 头部读取一条消息</span><br><span class="line"># 命令格式为 xread + count + 读取消息数 + streams + stream name + 开始消息id值 0-0代表从Stream第一个值开始</span><br><span class="line">127.0.0.1:6380&gt; xread count 1 streams topic 0-0</span><br><span class="line">1) 1) &quot;topic&quot;</span><br><span class="line">   2) 1) 1) &quot;1558191173977-0&quot;</span><br><span class="line">         2) 1) &quot;id&quot;</span><br><span class="line">            2) &quot;464&quot;</span><br><span class="line">            3) &quot;name&quot;</span><br><span class="line">            4) &quot;xiaoming&quot;</span><br><span class="line"># 从尾部读取一条消息, $代表消息id最后的一个值</span><br><span class="line">127.0.0.1:6380&gt; xread count 1 streams topic $</span><br><span class="line">(nil) # 毫无疑问这里一定会返回空的</span><br><span class="line"># 可以阻塞读方式，直到有新的消息加入就会返回 1000 代表阻塞1s</span><br><span class="line">127.0.0.1:6380&gt; xread block 1000 count 1 streams topic $</span><br></pre></td></tr></table></figure></p>
 <h2 id="创建消费组"><a href="#创建消费组" class="headerlink" title="创建消费组"></a>创建消费组</h2><p> Redis提供xgroup指令创建消费组，创建消费组需要提供起始的消息id初始化last_delivered_id变量。其中0-0代表从第一个消息开始消费，$代表从尾部开始消费</p>
@@ -627,7 +627,7 @@
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">10</span>
+                    <span class="site-state-item-count">13</span>
                     <span class="site-state-item-name">日志</span>
                   </a>
                 </div>
@@ -658,7 +658,9 @@
                     
                       
                     
-                    <span class="site-state-item-count">7</span>
+                      
+                    
+                    <span class="site-state-item-count">8</span>
                     <span class="site-state-item-name">分类</span>
                   </a>
                 </div>
@@ -697,7 +699,11 @@
                     
                       
                     
-                    <span class="site-state-item-count">11</span>
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">13</span>
                     <span class="site-state-item-name">标签</span>
                   </a>
                 </div>
@@ -782,7 +788,7 @@
 
     <footer id="footer" class="footer">
       <div class="footer-inner">
-        <div class="copyright">&copy; 2015 – <span itemprop="copyrightYear">2019</span>
+        <div class="copyright">&copy; 2015 – <span itemprop="copyrightYear">2020</span>
   <span class="with-love" id="animate">
     <i class="fa fa-user"></i>
   </span>
