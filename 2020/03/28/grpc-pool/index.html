@@ -96,18 +96,22 @@
 
 
 
-  <meta name="description" content="前言 一个宁静的夜晚里，群里报警机器人不断发出错误报警。查询错误日志Error: rpc error: code = 8 desc = etcdserver: mvcc:database space exceeded. 发现是etcd出现异常，针对这一次异常进行排查。 背景 项目使用微服务架构，编程语言golang。使用go-micro作为微服务框架。etcd用作服务注册中心，用于服务注册和服">
-<meta name="keywords" content="golang,go-micro,etcd">
+  <meta name="description" content="背景  线上服务使用go-micro框架，一次修复线上bug热更某个服务节点重启时，发现重启后访问该服务都会出现少量grpc error。导致重启后偶尔服务一小段时间服务不可用。 排查分析  重启后服务一段时间不可用，通过时间推断确定是重启后出现服务不可用。怀疑是grpc call某个地方出现问题。发现grpc call时候会先从grpc链接池取出grpc链接，使用该grpc链接来进行请求。重">
+<meta name="keywords" content="golang,go-micro,grpc">
 <meta property="og:type" content="article">
-<meta property="og:title" content="一次排查etcd mvcc database space exceeded的问题">
-<meta property="og:url" content="http://yoursite.com/2020/03/15/etcd/index.html">
+<meta property="og:title" content="go micro grpc pool问题排查">
+<meta property="og:url" content="http://yoursite.com/2020/03/28/grpc-pool/index.html">
 <meta property="og:site_name" content="黄少杰">
-<meta property="og:description" content="前言 一个宁静的夜晚里，群里报警机器人不断发出错误报警。查询错误日志Error: rpc error: code = 8 desc = etcdserver: mvcc:database space exceeded. 发现是etcd出现异常，针对这一次异常进行排查。 背景 项目使用微服务架构，编程语言golang。使用go-micro作为微服务框架。etcd用作服务注册中心，用于服务注册和服">
+<meta property="og:description" content="背景  线上服务使用go-micro框架，一次修复线上bug热更某个服务节点重启时，发现重启后访问该服务都会出现少量grpc error。导致重启后偶尔服务一小段时间服务不可用。 排查分析  重启后服务一段时间不可用，通过时间推断确定是重启后出现服务不可用。怀疑是grpc call某个地方出现问题。发现grpc call时候会先从grpc链接池取出grpc链接，使用该grpc链接来进行请求。重">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2020-03-15T04:53:52.979Z">
+<meta property="og:image" content="http://yoursite.com/2020/03/28/grpc-pool/stae.jpg">
+<meta property="og:image" content="http://yoursite.com/2020/03/28/grpc-pool/merge.jpg">
+<meta property="og:image" content="http://yoursite.com/2020/03/28/grpc-pool/github.jpg">
+<meta property="og:updated_time" content="2020-03-28T13:38:56.551Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="一次排查etcd mvcc database space exceeded的问题">
-<meta name="twitter:description" content="前言 一个宁静的夜晚里，群里报警机器人不断发出错误报警。查询错误日志Error: rpc error: code = 8 desc = etcdserver: mvcc:database space exceeded. 发现是etcd出现异常，针对这一次异常进行排查。 背景 项目使用微服务架构，编程语言golang。使用go-micro作为微服务框架。etcd用作服务注册中心，用于服务注册和服">
+<meta name="twitter:title" content="go micro grpc pool问题排查">
+<meta name="twitter:description" content="背景  线上服务使用go-micro框架，一次修复线上bug热更某个服务节点重启时，发现重启后访问该服务都会出现少量grpc error。导致重启后偶尔服务一小段时间服务不可用。 排查分析  重启后服务一段时间不可用，通过时间推断确定是重启后出现服务不可用。怀疑是grpc call某个地方出现问题。发现grpc call时候会先从grpc链接池取出grpc链接，使用该grpc链接来进行请求。重">
+<meta name="twitter:image" content="http://yoursite.com/2020/03/28/grpc-pool/stae.jpg">
 
 
 
@@ -115,7 +119,7 @@
 
   
   
-  <link rel="canonical" href="http://yoursite.com/2020/03/15/etcd/">
+  <link rel="canonical" href="http://yoursite.com/2020/03/28/grpc-pool/">
 
 
 
@@ -125,7 +129,7 @@
   };
 </script>
 
-  <title>一次排查etcd mvcc database space exceeded的问题 | 黄少杰</title>
+  <title>go micro grpc pool问题排查 | 黄少杰</title>
   
 
 
@@ -352,7 +356,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/03/15/etcd/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/03/28/grpc-pool/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="黄少杰">
@@ -369,7 +373,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">一次排查etcd mvcc database space exceeded的问题
+          <h1 class="post-title" itemprop="name headline">go micro grpc pool问题排查
 
               
             
@@ -395,7 +399,7 @@
                 
               
 
-              <time title="创建时间：2020-03-15 11:02:34 / 修改时间：12:53:52" itemprop="dateCreated datePublished" datetime="2020-03-15T11:02:34+08:00">2020-03-15</time>
+              <time title="创建时间：2020-03-28 20:23:08 / 修改时间：21:38:56" itemprop="dateCreated datePublished" datetime="2020-03-28T20:23:08+08:00">2020-03-28</time>
             
 
             
@@ -407,8 +411,8 @@
           
             <span class="post-updated">
               &nbsp; | &nbsp; 更新于
-              <time itemprop="dateUpdated" datetime="2020-03-15T12:53:52+08:00" content="2020-03-15">
-                2020-03-15
+              <time itemprop="dateUpdated" datetime="2020-03-28T21:38:56+08:00" content="2020-03-28">
+                2020-03-28
               </time>
             </span>
           
@@ -461,18 +465,31 @@
       
         <meta name="referrer" content="no-referrer">
 
-<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p> 一个宁静的夜晚里，群里报警机器人不断发出错误报警。查询错误日志<code>Error: rpc error: code = 8 desc = etcdserver: mvcc:database space exceeded</code>. 发现是etcd出现异常，针对这一次异常进行排查。</p>
-<h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p> 项目使用微服务架构，编程语言golang。使用go-micro作为微服务框架。etcd用作服务注册中心，用于服务注册和服务发现。etcd出现异常则整个服务处于不可用状态。</p>
-<h2 id="原因分析"><a href="#原因分析" class="headerlink" title="原因分析"></a>原因分析</h2><p> 从错误信息中得知<code>mvcc: database space exceeded</code>一般为etcd内存达到上限。etcd使用内存限制为2GB, 当内存达到上限导致数据无法写入。etcd默认不会compact。频繁地变更和写入数据会导致历史数据堆积，超过内存无法写入。需要开启<code>auto-compact</code></p>
-<p> 修改etcd启动参数的方法<br> <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">ExecStart=/usr/local/bin/etcd \</span><br><span class="line">-name etcd1 \</span><br><span class="line">-data-dir /var/lib/etcd \</span><br><span class="line">--advertise-client-urls http://127.0.0.1:2379 \</span><br><span class="line">--listen-client-urls http://127.0.0.1:2379 \</span><br><span class="line">--auto-compaction-retention=1 \     #开启每隔一个小时自动压缩</span><br></pre></td></tr></table></figure></p>
-<h2 id="深入分析"><a href="#深入分析" class="headerlink" title="深入分析"></a>深入分析</h2><p> etcd只是用于服务注册和服务发现，应该不会出现频繁写入导致历史数据堆积。若只是用于服务发现、服务注册以及配置中心，不应该出现内存写满，压缩数据只是治标不治本。由此阅读go-micro的服务注册相关代码。</p>
-<p> 加入log分析每次服务注册内容<br> <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">   <span class="comment">// register 代码片段</span></span><br><span class="line">service := &amp;registry.Service&#123;</span><br><span class="line">	Name:      config.Name,</span><br><span class="line">	Version:   config.Version,</span><br><span class="line">	Nodes:     []*registry.Node&#123;node&#125;,</span><br><span class="line">	Endpoints: endpoints,</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">g.Lock()</span><br><span class="line">registered := g.registered</span><br><span class="line">g.Unlock()</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> !registered &#123;</span><br><span class="line">	log.Logf(<span class="string">"Registering node: %s"</span>, node.Id)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// create registry options</span></span><br><span class="line">rOpts := []registry.RegisterOption&#123;registry.RegisterTTL(config.RegisterTTL)&#125;</span><br><span class="line"></span><br><span class="line">   log.Info(<span class="string">"service, "</span>, service) <span class="comment">// 打印log查看每次注册内容</span></span><br><span class="line"><span class="keyword">if</span> err := config.Registry.Register(service, rOpts...); err != <span class="literal">nil</span> &#123;</span><br><span class="line">	<span class="keyword">return</span> err</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<p> 查看log内容后有惊人发现，每次log内容都有可能不一样。service里的subcribers的顺序有时候A在先，有时候B在先。</p>
- <figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line"> <span class="attr">"name"</span>: <span class="string">"subcriberA"</span></span><br><span class="line"> <span class="string">"request"</span>: xxxx,</span><br><span class="line"> <span class="attr">"response"</span>: xxxx,</span><br><span class="line">&#125;, </span><br><span class="line">&#123;</span><br><span class="line">  <span class="attr">"name"</span>: <span class="string">"subcriberB"</span></span><br><span class="line">  <span class="string">"request"</span>: xxxx,</span><br><span class="line">  <span class="attr">"response"</span>: xxxx,</span><br><span class="line"> &#125;</span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">&#123;</span><br><span class="line">   <span class="attr">"name"</span>: <span class="string">"subcriberB"</span></span><br><span class="line">   <span class="string">"request"</span>: xxxx,</span><br><span class="line">   <span class="attr">"response"</span>: xxxx,</span><br><span class="line">&#125;, </span><br><span class="line">&#123;</span><br><span class="line">    <span class="attr">"name"</span>: <span class="string">"subcriberA"</span></span><br><span class="line">    <span class="string">"request"</span>: xxxx,</span><br><span class="line">    <span class="attr">"response"</span>: xxxx,</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p> 查看subcribers的排序代码</p>
- <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> subscriberList []*subscriber</span><br><span class="line"><span class="keyword">for</span> e := <span class="keyword">range</span> g.subscribers &#123;</span><br><span class="line">	<span class="comment">// Only advertise non internal subscribers</span></span><br><span class="line">	<span class="keyword">if</span> !e.Options().Internal &#123;</span><br><span class="line">		subscriberList = <span class="built_in">append</span>(subscriberList, e)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line">sort.Slice(subscriberList, <span class="function"><span class="keyword">func</span><span class="params">(i, j <span class="keyword">int</span>)</span> <span class="title">bool</span></span> &#123;</span><br><span class="line">	<span class="keyword">return</span> subscriberList[i].topic &gt; subscriberList[j].topic</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
-<p> subscriberList以topic作为key排序。A和B刚好关注了同一个topic。由于sort使用的是三路快排，是一个不稳定的排序方法。导致subscriberList顺序不一样，每次注册写入etcd的值不一样导致了历史数据堆积。</p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p> 业务逻辑需要两个subscriber需要订阅同一个topic监听相关变动。因为subscriberList以topic作为key排序,所以一个服务中subscriber不能关注同一个topic，否则会导致服务注册时把注册中心写满。在当前最新版本2.2.0中依然是使用topic作为排序key，我认为不应该以topic作为排序key应该以name作为排序key，这样导致业务代码必须避免关注同一个topic问题。</p>
+<h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>  线上服务使用go-micro框架，一次修复线上bug热更某个服务节点重启时，发现重启后访问该服务都会出现少量<code>grpc error</code>。导致重启后偶尔服务一小段时间服务不可用。</p>
+<h2 id="排查分析"><a href="#排查分析" class="headerlink" title="排查分析"></a>排查分析</h2><p>  重启后服务一段时间不可用，通过时间推断确定是重启后出现服务不可用。怀疑是grpc call某个地方出现问题。发现grpc call时候会先从grpc链接池取出grpc链接，使用该grpc链接来进行请求。重启服务后，原来链接该服务的grpc链接可能已经失效。</p>
+<p>  找出取grpc conn的代码加上log, 发现当错误出现时候grpc conn的状态是<code>TRANSIENT_FAILURE</code><br>  <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cc, err := g.pool.getConn(address, opts...)</span><br><span class="line">log.Debugf(<span class="string">"grpc state"</span>, cc.GetState())</span><br></pre></td></tr></table></figure></p>
+<p>  可以确定是从grpc pool中取出的链接是无效的。因为服务重启后使用的还是原来的<code>addr:port</code>, 请求端从etcd获取到注册的<code>addr:port</code>还是原来的。会从grpc pool取出之前的无效链接。</p>
+<h2 id="grpc-state"><a href="#grpc-state" class="headerlink" title="grpc state"></a>grpc state</h2><p> 需要分析为什么会出现<code>TRANSIENT_FAILURE</code>,grpc每个状态代表什么意思。</p>
+<ul>
+<li>CONNECTING: 代表链接刚刚建立刚刚完成来tcp链接。链接初始建立的阶段。</li>
+<li>READY: 链接已经建立好了可以开始服务了。</li>
+<li>TRANSIENT_FAILURE: 在链接过程中出现socket错误或tcp链接三次握手中出现超时,这个时候会开始尝试重现链接最终会进入<code>CONNECTING</code>状态。</li>
+<li>IDLE: 链接处于闲置状态,一般从<code>CONNECTING</code>状态进入或<code>READY</code>状态一个超时间内没有活跃grpc请求进入这个状态。</li>
+<li><p>SHUTDOWN: grpc链接关闭，一般是接收到关闭链接请求或通信过程中出现不可修复的错误时候进入这个状态。</p>
+<p>每个状态转换图</p>
+<p><img src="/2020/03/28/grpc-pool/stae.jpg" alt></p>
+<p><a href="https://github.com/grpc/grpc/blob/master/doc/connectivity-semantics-and-api.md" target="_blank" rel="noopener">相关文档</a></p>
+</li>
+</ul>
+<h2 id="修复错误"><a href="#修复错误" class="headerlink" title="修复错误"></a>修复错误</h2><p> 查看grpc_pool的内部实现, 链接池利用了grpc多路复用特性。多个请求可以复用同一个请求。限制过多请求使用同一个链接, 但是没有相关对应grpc state判断，也就是讲从grpc pool中取出的链接有可能是失效的。</p>
+ <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(p *pool)</span> <span class="title">getConn</span><span class="params">(addr <span class="keyword">string</span>, opts ...grpc.DialOption)</span> <span class="params">(*poolConn, error)</span></span> &#123;</span><br><span class="line">	now := time.Now().Unix()</span><br><span class="line">	p.Lock()</span><br><span class="line">	sp, ok := p.conns[addr]</span><br><span class="line">	<span class="keyword">if</span> !ok &#123;</span><br><span class="line">		sp = &amp;streamsPool&#123;head: &amp;poolConn&#123;&#125;, busy: &amp;poolConn&#123;&#125;, count: <span class="number">0</span>, idle: <span class="number">0</span>&#125;</span><br><span class="line">		p.conns[addr] = sp</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">//  while we have conns check streams and then return one</span></span><br><span class="line">	<span class="comment">//  otherwise we'll create a new conn</span></span><br><span class="line">	conn := sp.head.next</span><br><span class="line">	<span class="keyword">for</span> conn != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="comment">//  a old conn</span></span><br><span class="line">		<span class="keyword">if</span> now-conn.created &gt; p.ttl &#123;...&#125;</span><br><span class="line">		<span class="comment">//  a busy conn</span></span><br><span class="line">		<span class="keyword">if</span> conn.streams &gt;= p.maxStreams &#123;...&#125;</span><br><span class="line">		<span class="comment">//  a idle conn</span></span><br><span class="line">		<span class="keyword">if</span> conn.streams == <span class="number">0</span> &#123;...&#125;</span><br><span class="line">		<span class="comment">//  a good conn</span></span><br><span class="line">		conn.streams++</span><br><span class="line">		p.Unlock()</span><br><span class="line">		<span class="keyword">return</span> conn, <span class="literal">nil</span></span><br><span class="line">	&#125;</span><br><span class="line">	p.Unlock()</span><br><span class="line"></span><br><span class="line">	<span class="comment">//  create new conn</span></span><br><span class="line">	cc, err := grpc.Dial(addr, opts...)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">nil</span>, err</span><br><span class="line">	&#125;</span><br><span class="line">	conn = &amp;poolConn&#123;cc, <span class="literal">nil</span>, addr, p, sp, <span class="number">1</span>, time.Now().Unix(), <span class="literal">nil</span>, <span class="literal">nil</span>, <span class="literal">false</span>&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">//  add conn to streams pool</span></span><br><span class="line">	p.Lock()</span><br><span class="line">	<span class="keyword">if</span> sp.count &lt; p.size &#123;</span><br><span class="line">		addConnAfter(conn, sp.head)</span><br><span class="line">	&#125;</span><br><span class="line">	p.Unlock()</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> conn, <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>  针对这种情况添加添加检查state相关代码</p>
+  <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">	<span class="keyword">for</span> conn != <span class="literal">nil</span> &#123;</span><br><span class="line"><span class="comment">//  check conn state</span></span><br><span class="line"><span class="comment">// https://github.com/grpc/grpc/blob/master/doc/connectivity-semantics-and-api.md</span></span><br><span class="line"><span class="keyword">switch</span> conn.GetState() &#123;</span><br><span class="line"><span class="keyword">case</span> connectivity.Connecting:</span><br><span class="line">	conn = conn.next</span><br><span class="line">	<span class="keyword">continue</span></span><br><span class="line"><span class="keyword">case</span> connectivity.Shutdown:</span><br><span class="line">	next := conn.next</span><br><span class="line">	<span class="keyword">if</span> conn.streams == <span class="number">0</span> &#123;</span><br><span class="line">		removeConn(conn)</span><br><span class="line">		sp.idle--</span><br><span class="line">	&#125;</span><br><span class="line">	conn = next</span><br><span class="line">	<span class="keyword">continue</span></span><br><span class="line"><span class="keyword">case</span> connectivity.TransientFailure:</span><br><span class="line">	next := conn.next</span><br><span class="line">	<span class="keyword">if</span> conn.streams == <span class="number">0</span> &#123;</span><br><span class="line">		removeConn(conn)</span><br><span class="line">		conn.ClientConn.Close()</span><br><span class="line">		sp.idle--</span><br><span class="line">	&#125;</span><br><span class="line">	conn = next</span><br><span class="line">	<span class="keyword">continue</span></span><br><span class="line"><span class="keyword">case</span> connectivity.Ready:</span><br><span class="line"><span class="keyword">case</span> connectivity.Idle:</span><br><span class="line">&#125;</span><br><span class="line">....</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+<p>  修改后本地重现服务重启，再也没有出现重启一段时间后偶尔无法访问的情况。针对这个修改给<code>go-micro</code>团队提出了pull request</p>
+<p>  没想到Asim大佬这么快就merge了我的request</p>
+<p>  <img src="/2020/03/28/grpc-pool/merge.jpg" alt></p>
+<p>  <img src="/2020/03/28/grpc-pool/github.jpg" alt></p>
+<p>  从此世界留下了我的足迹！！！！！</p>
 
       
     </div>
@@ -500,7 +517,7 @@
           
             <a href="/tags/go-micro/" rel="tag"># go-micro</a>
           
-            <a href="/tags/etcd/" rel="tag"># etcd</a>
+            <a href="/tags/grpc/" rel="tag"># grpc</a>
           
         </div>
       
@@ -513,8 +530,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2020/01/01/newyear/" rel="next" title="写给即将过去的2019">
-                <i class="fa fa-chevron-left"></i> 写给即将过去的2019
+              <a href="/2020/03/15/etcd/" rel="next" title="一次排查etcd mvcc database space exceeded的问题">
+                <i class="fa fa-chevron-left"></i> 一次排查etcd mvcc database space exceeded的问题
               </a>
             
           </div>
@@ -522,10 +539,6 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2020/03/28/grpc-pool/" rel="prev" title="go micro grpc pool问题排查">
-                go micro grpc pool问题排查 <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -738,7 +751,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#背景"><span class="nav-number">2.</span> <span class="nav-text">背景</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#原因分析"><span class="nav-number">3.</span> <span class="nav-text">原因分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#深入分析"><span class="nav-number">4.</span> <span class="nav-text">深入分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">5.</span> <span class="nav-text">总结</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#背景"><span class="nav-number">1.</span> <span class="nav-text">背景</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#排查分析"><span class="nav-number">2.</span> <span class="nav-text">排查分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#grpc-state"><span class="nav-number">3.</span> <span class="nav-text">grpc state</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#修复错误"><span class="nav-number">4.</span> <span class="nav-text">修复错误</span></a></li></ol></div>
             
 
           </div>
